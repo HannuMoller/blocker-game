@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blocker Game</title>
+    <link href="css/blocker.css" type="text/css" rel="stylesheet">
+
+</head>
+<body onkeydown="blockerGame.keyDown(event)">
+<table>
+    <tr>
+        <td><button id="start" onclick="blockerGame.startGame()">START</button></td>
+        <td> Points: </td>
+        <td> <div id="points">0</div> </td>
+    </tr>
+</table>
+<br/>
+<canvas id="playground" width="800" height="400"></canvas>
+
+</body>
+</html>
+<script src="js/blocker.js" type="text/javascript"></script>
