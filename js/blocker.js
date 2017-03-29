@@ -22,16 +22,38 @@ function Block(x, hole) {
     this.x = x;
     this.hole = hole;
 
-    this.crashed = function(player) {
-        if (player.y < this.hole) return true;
-        if (player.y+player.height > this.hole+48) return true;
-        return false;
+    this.points = function(player) {
+        if (player.y < this.hole) return -1;
+        if (player.y+player.height > this.hole+48) return -1;
+        return 0;
     }
 
     this.show = function(ctx) {
         ctx.fillStyle = "#00FF00"; // green
         ctx.fillRect(this.x, 0, 10, this.hole);
         ctx.fillRect(this.x, this.hole+48, 10, ctx.canvas.height-this.hole-48);
+    }
+}
+
+function Item(x,y,img) {
+    this.x = x;
+    this.y = y;
+    this.img = new Image();
+    this.img.src = 'img/'+img;
+
+    this.points = function(player) {
+        if (player.y > this.y+this.img.height) {
+            return 0;
+        }
+        else if (player.y+player.height < this.y) {
+            return 0;
+        }
+
+        return 1000;
+    }
+
+    this.show = function(ctx) {
+        ctx.drawImage(this.img, this.x, this.y);
     }
 }
 
@@ -43,6 +65,21 @@ function Game() {
     this.background.src = 'img/lpr.jpg';
 
     this.blocks = [];
+    this.items = [  'spades.png',
+                    'hearts.png',
+                    'clubs.png',
+                    'diamonds.png',
+                    '3dstar.png',
+                    'apple.png',
+                    'bag.png',
+                    'bunny.png',
+                    'dog.png',
+                    'emerald.png',
+                    'faceb.png',
+                    'star.png',
+                    'twitter.png',
+                    'wiki.png'
+                 ];
 
     this.player = new Player();
 
@@ -80,9 +117,17 @@ function Game() {
     }
 
     this.newBlock = function() {
-       var hole = Math.floor(Math.random() * (document.getElementById('playground').height - 144)) + 48;
-       var x = document.getElementById('playground').width - 1;
-       this.blocks.push(new Block(x, hole));
+        var x = document.getElementById('playground').width - 1;
+        if (Math.random() < 0.5) {
+            var i = Math.floor(Math.random() * this.items.length);
+            var y = Math.floor(Math.random() * document.getElementById('playground').height - 30);
+            this.blocks.push(new Item(x, y, this.items[i]));
+        }
+        else
+        {
+            var hole = Math.floor(Math.random() * (document.getElementById('playground').height - 144)) + 48;
+            this.blocks.push(new Block(x, hole));
+        }
     }
 
     this.tack = function() {
@@ -103,9 +148,14 @@ function Game() {
         if (this.blocks[0].x < -9) {
             this.blocks.splice(0,1);
         } else if (this.blocks[0].x < this.player.width) {
-            if (this.blocks[0].crashed(this.player)) {
+            var points = this.blocks[0].points(this.player);
+            if (points < 0) {
                 this.player.ok = false;
                 this.ok = false;
+            }
+            else if (points > 0) {
+                this.totalPoints += points;
+                this.blocks.splice(0,1);
             }
         }
         // move blocks to right
